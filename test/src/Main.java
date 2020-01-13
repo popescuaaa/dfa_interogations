@@ -52,6 +52,12 @@ public class Main {
                 break;
             case 2:
                 //TODO: Accessible states
+                ArrayList<State> accessibleStates = dfa.accessibleStates();
+                System.out.println("==================================");
+                for (State s : accessibleStates) {
+                    System.out.println("Accessible state: " + s.getName());
+                }
+
                 break;
             case 3:
                 //TODO: Useful states
