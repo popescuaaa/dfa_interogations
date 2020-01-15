@@ -32,4 +32,13 @@ public class Transition {
     public void setOn(Symbol on) {
         this.on = on;
     }
+
+    @Override
+    public String toString() {
+        return "Transition{" +
+                "from=" + from.getName() +
+                ", to=" + to.getName() +
+                ", on=" + on.getSymbol() +
+                '}';
+    }
 }

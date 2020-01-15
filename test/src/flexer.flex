@@ -1,7 +1,7 @@
 
 %%
 
-%class Flex
+%class Flexer
 %unicode
 /*%debug*/
 %int
@@ -9,7 +9,9 @@
 /*%column*/
 
 %{
-
+    public State from;
+    public State to;
+    public Symbol on;
 %}
 
 
@@ -34,8 +36,9 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <ELEMK> {Name} {
-    //TODO: process state
-    System.out.println("State: " + yytext());
+    // State Processing
+    State state = new State(yytext(), false, false);
+    Main.states.add(state);
 	yybegin(STOPK);
 }
 
@@ -53,8 +56,6 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <STARTS> "{" {
-    //TODO: Done K, starting Sigma
-    System.out.println();
     yybegin(INITS);
 }
 
@@ -63,8 +64,9 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <ELEMS, INITS> {Symbol}	{
-    //TODO: Process symbol
-	System.out.println(yycharat(0));
+    // Symbol Processing
+    Symbol symbol = new Symbol(yycharat(0));
+    Main.alphabet.add(symbol);
     yybegin(STOPS);
 }
 
@@ -78,8 +80,6 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <SEPSD> "," {
-    //TODO: Done Sigma, starting delta
-    System.out.println();
     yybegin(STARTD);
 }
 
@@ -96,8 +96,8 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <SRCT> {Name} {
-    //TODO: Process source
-    System.out.println("Transition from " + yytext());
+    // Transition source processing
+    from = new State(yytext(), false, false);
     yybegin(SEPSST);
 }
 
@@ -107,8 +107,8 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <SYMT> {Symbol} {
-    //TODO: process symbol
-    System.out.println("Transition on " + yycharat(0));
+    // Transition symbol processing
+    on = new Symbol(yycharat(0));
     yybegin(SEPSDT);
 }
 
@@ -117,9 +117,9 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <DESTT> {Name} {
-    //TODO: Process destination
-    System.out.println("Transition to " + yytext());
-    System.out.println();
+    // Transition destination processing
+    to = new State(yytext(), false, false);
+    Main.transitions.add(new Transition(from, to, on));
     yybegin(ENDT);
 }
 
@@ -141,8 +141,12 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <SS> {Name} {
-    //TODO: Process start state
-    System.out.println("Start state " + yytext());
+    // Start state Processing
+    for (State s : Main.states) {
+         if (s.getName().equals(yytext())) {
+            s.setStart(true);
+         }
+    }
     yybegin(SEPSF);
 }
 
@@ -159,8 +163,12 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <INITF,ELEMF> {Name} {
-    //TODO: Process final state
-    System.out.println("Final state " + yytext());
+    // Final state Processing
+    for (State s : Main.states) {
+        if (s.getName().equals(yytext())) {
+           s.setFinal(true);
+        }
+     }
     yybegin(STOPF);
 }
 
