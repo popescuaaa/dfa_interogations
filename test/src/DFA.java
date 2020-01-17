@@ -68,7 +68,8 @@ public class DFA {
     }
 
     public void productiveStatesGenerator() {
-        for (String s : states.keySet()) {
+        accessibleStatesGenerator();
+        for (String s : accessibleStates) {
             for (String finalSate : finalStates) {
                 if (isPath(s, finalSate)) {
                     productiveStates.add(s);
@@ -84,10 +85,7 @@ public class DFA {
 
     public Set<String> getUtilStates() {
         productiveStatesGenerator();
-        accessibleStatesGenerator();
-        Set<String> intersection =  new HashSet<>(accessibleStates);
-        intersection.retainAll(productiveStates);
-        return intersection;
+        return productiveStates;
     }
 
     public boolean isVoidLanguage() {

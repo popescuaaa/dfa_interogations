@@ -37,7 +37,7 @@ public class Main {
         }
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader("resources/dfa"));
+            BufferedReader br = new BufferedReader(new FileReader("dfa"));
             Flexer scanner = new Flexer(br);
             scanner.yylex();
             br.close();
@@ -46,9 +46,6 @@ public class Main {
         }
 
         dfa = new DFA(states, finalStates, initialState);
-        System.out.println(finalStates.size());
-        System.out.println(states.size());
-        System.out.println(dfa.getAccessibleStates().size());
 
         switch(mode) {
             case 1:
