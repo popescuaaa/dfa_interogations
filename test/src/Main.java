@@ -1,12 +1,19 @@
+import javax.swing.plaf.IconUIResource;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Main {
-    public static ArrayList<State> states = new ArrayList<>();
-    public static ArrayList<Transition> transitions = new ArrayList<>();
-    public static ArrayList<Symbol> alphabet = new ArrayList<>();
+    /**
+     *  Graph model
+     */
+    public static HashMap<String, ArrayList<String>> states = new HashMap<>();
+    public static String initialState;
+    public static Set<String> finalStates = new HashSet<>();
     public static DFA dfa;
 
     public static void main(String [] argz) {
@@ -30,7 +37,7 @@ public class Main {
         }
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader("dfa"));
+            BufferedReader br = new BufferedReader(new FileReader("resources/dfa"));
             Flexer scanner = new Flexer(br);
             scanner.yylex();
             br.close();
@@ -38,8 +45,10 @@ public class Main {
             e.printStackTrace();
         }
 
-        dfa = new DFA(transitions, states, alphabet);
-        dfa.populate();
+        dfa = new DFA(states, finalStates, initialState);
+        System.out.println(finalStates.size());
+        System.out.println(states.size());
+        System.out.println(dfa.getAccessibleStates().size());
 
         switch(mode) {
             case 1:
@@ -52,18 +61,14 @@ public class Main {
                 break;
             case 2:
                 //TODO: Accessible states
-                for (State s : dfa.accessibleStates()) {
-                    System.out.println(s.getName());
+                for (String s : dfa.getAccessibleStates()) {
+                    System.out.println(s);
                 }
                 break;
             case 3:
                 //TODO: Useful states
-                for (State a : dfa.accessibleStates()) {
-                    for (State p : dfa.productiveStates()) {
-                        if (a.getIndex() == p.getIndex()) {
-                            System.out.println(a.getName());
-                        }
-                    }
+                for (String s : dfa.getUtilStates()) {
+                    System.out.println(s);
                 }
                 break;
             case 4:

@@ -1,4 +1,4 @@
-
+import java.util.ArrayList;
 %%
 
 %class Flexer
@@ -9,9 +9,8 @@
 /*%column*/
 
 %{
-    public State from;
-    public State to;
-    public Symbol on;
+    public String from;
+    public String to;
 %}
 
 
@@ -37,8 +36,8 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <ELEMK> {Name} {
     // State Processing
-    State state = new State(yytext(), false, false);
-    Main.states.add(state);
+    ArrayList<String> empty = new ArrayList<>();
+    Main.states.put(yytext(), empty);
 	yybegin(STOPK);
 }
 
@@ -65,8 +64,6 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <ELEMS, INITS> {Symbol}	{
     // Symbol Processing
-    Symbol symbol = new Symbol(yycharat(0));
-    Main.alphabet.add(symbol);
     yybegin(STOPS);
 }
 
@@ -97,7 +94,7 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <SRCT> {Name} {
     // Transition source processing
-    from = new State(yytext(), false, false);
+    from = yytext();
     yybegin(SEPSST);
 }
 
@@ -108,7 +105,6 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <SYMT> {Symbol} {
     // Transition symbol processing
-    on = new Symbol(yycharat(0));
     yybegin(SEPSDT);
 }
 
@@ -118,8 +114,8 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <DESTT> {Name} {
     // Transition destination processing
-    to = new State(yytext(), false, false);
-    Main.transitions.add(new Transition(from, to, on));
+    to = yytext();
+    Main.states.get(from).add(to);
     yybegin(ENDT);
 }
 
@@ -142,11 +138,7 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <SS> {Name} {
     // Start state Processing
-    for (State s : Main.states) {
-         if (s.getName().equals(yytext())) {
-            s.setStart(true);
-         }
-    }
+    Main.initialState = yytext();
     yybegin(SEPSF);
 }
 
@@ -163,12 +155,8 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 }
 
 <INITF,ELEMF> {Name} {
-    // Final state Processing
-    for (State s : Main.states) {
-        if (s.getName().equals(yytext())) {
-           s.setFinal(true);
-        }
-     }
+    // Final states Processing
+    Main.finalStates.add(yytext());
     yybegin(STOPF);
 }
 

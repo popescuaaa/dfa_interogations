@@ -1,175 +1,121 @@
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
 
 public class DFA {
-    private static final int DFA_FINAL_STATES_INITIAL_NUMBER= 10;
-    private ArrayList<Transition> transitions;
-    private ArrayList<State> states;
-    private ArrayList<Symbol> alphabet;
-    private State startState;
-    private ArrayList<State> finalStates = new ArrayList<>(DFA_FINAL_STATES_INITIAL_NUMBER);
+    private HashMap<String, ArrayList<String>> states;
+    private String initialState;
+    private Set<String> finalStates;
+    private Set<String> accessibleStates;
+    private Set<String> productiveStates;
 
-    DFA(final ArrayList<Transition> transitions,
-        final ArrayList<State> states,
-        final ArrayList<Symbol> alphabet){
+    DFA(final HashMap<String, ArrayList<String>> states,
+        final Set<String> finalStates,
+        final String initialState){
 
-        this.transitions = transitions;
-        this.alphabet = alphabet;
         this.states = states;
+        this.initialState = initialState;
+        this.finalStates = finalStates;
 
-        for (State s : states) {
-            if (s.isStart()) {
-                startState = s;
-            }
-        }
-
-        for (State s : states) {
-            if (s.isFinal()) {
-                finalStates.add(s);
-            }
-        }
+        accessibleStates = new TreeSet<>();
+        productiveStates = new TreeSet<>();
     }
 
     public boolean nullSymbolAcceptance() {
-        for (State s: finalStates) {
-            if (startState.getName().equals(s.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Integer getStateIndex(State s) {
-        for (int index = 0; index < states.size(); index++) {
-            if (states.get(index).getName().equals(s.getName())) {
-                return index;
-            }
-        }
-        return -1;
+       return finalStates.contains(initialState);
     }
 
     /**
-     *  State index mapping
+     *
+     * @param initialState
+     * @param destination
+     * @return
      */
-    public void populate() {
-        for (int index = 0; index < states.size(); index++) {
-            states.get(index).setIndex(index);
+    public boolean isPath(String initialState, String destination) {
+        HashMap<String, Boolean> visitedSates = new HashMap<>();
+        for (String s : states.keySet()) {
+            visitedSates.put(s, false);
         }
-
-        for (Transition t : transitions) {
-            t.getTo().setIndex(getStateIndex(t.getTo()));
-            t.getFrom().setIndex(getStateIndex(t.getFrom()));
-        }
-    }
-
-    public boolean isPath(State initialState, State destination) {
-        boolean[] visitedSates = new boolean[states.size()];
-        Stack<State> stack = new Stack<>();
-        visitedSates[initialState.getIndex()] = true;
+        Stack<String> stack = new Stack<>();
+        visitedSates.put(initialState, true);
         stack.add(initialState);
 
         while (stack.empty() == false) {
-            State currentState = stack.peek();
+            String currentState = stack.peek();
             stack.pop();
-            if (currentState.getIndex() == destination.getIndex()) {
+            if (currentState.equals(destination)) {
                 return true;
             }
-            for (Transition t : transitions) {
+            for (String n : states.get(currentState)) {
                 /**
                  *  Neighbouring condition in DFA Graph
                  */
-                if (t.getFrom().getIndex() == currentState.getIndex()) {
-                    if (!visitedSates[t.getTo().getIndex()]) {
-                        visitedSates[t.getTo().getIndex()] = true;
-                        stack.push(t.getTo());
+                    if (!visitedSates.get(n)) {
+                        visitedSates.put(n, true);
+                        stack.push(n);
                     }
-
                 }
             }
-        }
-
        return false;
     }
 
-    public boolean isInCycle(State s) {
-        boolean[] visitedSates = new boolean[states.size()];
-        LinkedList<State> queue = new LinkedList<>();
-        visitedSates[s.getIndex()] = true;
-        queue.push(s);
 
-        while (queue.size() != 0) {
-            State currentState = queue.poll();
-
-            if (currentState.getIndex() == s.getIndex() && queue.size() != 0) {
-                return true;
+    public void accessibleStatesGenerator() {
+        for (String s : states.keySet()) {
+            if (isPath(initialState, s)) {
+                accessibleStates.add(s);
             }
-            for (Transition t : transitions) {
-                /**
-                 *  Neighbouring condition in DFA Graph
-                 */
-                if (t.getFrom().getIndex() == currentState.getIndex()) {
-                    if (!visitedSates[t.getTo().getIndex()]) {
-                        visitedSates[t.getTo().getIndex()] = true;
-                        queue.push(t.getTo());
-                    }
+        }
+    }
 
+    public void productiveStatesGenerator() {
+        for (String s : states.keySet()) {
+            for (String finalSate : finalStates) {
+                if (isPath(s, finalSate)) {
+                    productiveStates.add(s);
                 }
             }
         }
-
-        return false;
     }
 
-
-    public ArrayList<State> accessibleStates() {
-        ArrayList<State> accessibleStates = new ArrayList<>();
-        for (State s : states) {
-            if (isPath(startState, s) && !accessibleStates.contains(s)) {
-                accessibleStates.add(s);
-                s.setAccessible(true);
-            }
-        }
+    public Set<String> getAccessibleStates() {
+        accessibleStatesGenerator();
         return accessibleStates;
     }
 
-    public ArrayList<State> productiveStates() {
-        ArrayList<State> productiveStates = new ArrayList<>();
-        for (State s : states) {
-            for (State finalSate : finalStates) {
-                if (isPath(s, finalSate) && !productiveStates.contains(s)) {
-                    productiveStates.add(s);
-                    s.setProductive(true);
-                }
-            }
-        }
-
-        return productiveStates;
+    public Set<String> getUtilStates() {
+        productiveStatesGenerator();
+        accessibleStatesGenerator();
+        Set<String> intersection =  new HashSet<>(accessibleStates);
+        intersection.retainAll(productiveStates);
+        return intersection;
     }
 
-
     public boolean isVoidLanguage() {
-        ArrayList<State> accessibleStates = accessibleStates();
-        for (State finalState : finalStates) {
-            for (State acc : accessibleStates) {
-                if (finalState.getIndex() == acc.getIndex()) {
-                    return false;
-                }
-            }
+        accessibleStatesGenerator();
+        productiveStatesGenerator();
+        boolean noFinalAccessible = false;
+        boolean noProductiveAccessible = false;
+        boolean initialStateProductive = false;
+        Set<String> finalAndAccessibleStates = new HashSet<>(accessibleStates);
+        finalAndAccessibleStates.retainAll(finalStates);
+        if (finalAndAccessibleStates.size() == 0) {
+            noFinalAccessible = true;
         }
-        return true;
+
+        Set<String> intersection =  new HashSet<>(accessibleStates);
+        intersection.retainAll(productiveStates);
+        if (intersection.size() == 0) {
+            noFinalAccessible = true;
+        }
+
+        if (!productiveStates.contains(initialState)) {
+            initialStateProductive = true;
+        }
+
+        return noFinalAccessible || noProductiveAccessible || initialStateProductive;
     }
 
     public boolean isFiniteLanguage() {
-        for (State s : states) {
-            if (s.isAccessible() && s.isProductive()) {
-                if (isInCycle(s)) {
-                    return false;
-                }
-            }
-        }
-
         return true;
     }
 }

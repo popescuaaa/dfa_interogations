@@ -6,7 +6,7 @@ JFLEX = ./lib/jflex-1.6.1.jar
 all: build
 
 Flexer.java: flexer.flex
-	jflex --nobak $<
+	jflex --nobak $< 1>&2
 
 sources = $(wildcard *.java)
 classes = $(sources:.java=.class)
@@ -18,6 +18,6 @@ run: build
 
 .PHONY: clean
 clean :
-	rm -f *.class Flexer.java *~
+	rm -f *.class *~
 %.class : %.java
 	$(JC) $(JFLAGS) $<

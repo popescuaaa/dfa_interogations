@@ -1,44 +1,18 @@
 public class Transition {
-    private State from;
-    private State to;
-    private Symbol on;
+    private String from;
+    private String to;
 
-    Transition(final State from, final State to, final Symbol on) {
+    Transition(final String from, final String to) {
         this.from = from;
         this.to = to;
-        this.on = on;
     }
 
-    public State getFrom() {
+    public String getFrom() {
         return from;
     }
 
-    public State getTo() {
+    public String getTo() {
         return to;
     }
 
-    public Symbol getOn() {
-        return on;
-    }
-
-    public void setFrom(State from) {
-        this.from = from;
-    }
-
-    public void setTo(State to) {
-        this.to = to;
-    }
-
-    public void setOn(Symbol on) {
-        this.on = on;
-    }
-
-    @Override
-    public String toString() {
-        return "Transition{" +
-                "from=" + from.getName() +
-                ", to=" + to.getName() +
-                ", on=" + on.getSymbol() +
-                '}';
-    }
 }
