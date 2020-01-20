@@ -1,8 +1,6 @@
-import javax.swing.plaf.IconUIResource;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +9,7 @@ public class Main {
     /**
      *  Graph model
      */
-    public static HashMap<String, ArrayList<String>> states = new HashMap<>();
+    public static HashMap<String, Set<String>> states = new HashMap<>();
     public static String initialState;
     public static Set<String> finalStates = new HashSet<>();
     public static DFA dfa;
@@ -78,7 +76,7 @@ public class Main {
                 break;
             case 5:
                 //TODO: Finite language
-                if (dfa.isFiniteLanguage()) {
+                if (dfa.isDAG()) {
                     System.out.println("Yes");
                 } else {
                     System.out.println("No");

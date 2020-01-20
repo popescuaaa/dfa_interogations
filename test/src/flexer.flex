@@ -1,4 +1,5 @@
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 %%
 
 %class Flexer
@@ -36,7 +37,7 @@ Name = ([:uppercase:] | [:lowercase:] | [:digit:] | "_")+
 
 <ELEMK> {Name} {
     // State Processing
-    ArrayList<String> empty = new ArrayList<>();
+    Set<String> empty = new HashSet<>();
     Main.states.put(yytext(), empty);
 	yybegin(STOPK);
 }
